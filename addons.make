@@ -1,0 +1,3 @@
+ofxXmlSettings
+ofxSyphon
+ofxUI
