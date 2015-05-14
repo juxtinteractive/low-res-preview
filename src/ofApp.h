@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxUI.h"
+#include "ofxSyphon.h"
 #include "DoubleEndedPositioner.h"
 
 enum AppState {
@@ -44,4 +45,14 @@ class ofApp : public ofBaseApp{
     float desideredPixelWidth;
     ofImage testImg;
     DoubleEndedPositioner calibratorTool;
+    
+    
+    void serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg);
+    void serverRetired(ofxSyphonServerDirectoryEventArgs &arg);
+    int syphonServerIndex;
+    ofxSyphonServerDescription syphonServerDesc;
+    ofxSyphonServerDirectory syphonDir;
+    ofxSyphonClient syphonClient;
+    
+    void rebuildSyphonServerList();
 };

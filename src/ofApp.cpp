@@ -5,9 +5,19 @@ const float ofApp::calibrationSizeOptionsValues[] = {279.4,215.9,88.9,100.0};
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    ofSetFrameRate(60);
+    ofSetWindowTitle("LowResPreview");
+    
     desideredPixelWidth = 1.0;
     lastState = state = Settings;
     outPixelPerMM = 3.0;
+    
+    syphonDir.setup();
+    syphonClient.setup();
+    syphonServerIndex = -1;
+    ofAddListener(syphonDir.events.serverAnnounced, this, &ofApp::serverAnnounced);
+    ofAddListener(syphonDir.events.serverRetired, this, &ofApp::serverRetired);
+    
     testImg.load("rainbow.png");
     testImg.load("noise.jpg");
     testImg.getTexture().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
@@ -20,6 +30,7 @@ void ofApp::setup(){
     ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth));
     pwTi->setOnlyNumericInput(true);
     settingCanvas->addSpacer();
+    settingCanvas->addRadio("Syphon Servers", vector<string>());
 
     ofAddListener(settingCanvas->newGUIEvent,this,&ofApp::guiEvent);
     
@@ -46,6 +57,7 @@ void ofApp::setup(){
 
     ofAddListener(calibrateCanvas->newGUIEvent,this,&ofApp::guiEvent);
     
+    
 }
 
 //--------------------------------------------------------------
@@ -55,8 +67,12 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    ofClear(0);
     ofSetColor(ofColor::white);
-    testImg.draw(0, 0, testImg.getWidth() * outPixelPerMM * desideredPixelWidth, testImg.getHeight() * outPixelPerMM * desideredPixelWidth);
+//    testImg.draw(0, 0, testImg.getWidth() * outPixelPerMM * desideredPixelWidth, testImg.getHeight() * outPixelPerMM * desideredPixelWidth);
+
+    syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
+
     switch (state) {
         case Viewing:
             break;
@@ -107,6 +123,48 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     }else if(name == "Read From Marker"){
         outPixelPerMM = calibratorTool.getLength() / currentCalibratorTolLengthInMM;
         
+    }else if(name == "Syphon Servers"){
+        ofxUIRadio *syphon_list = (ofxUIRadio*)e.widget;
+        string active = syphon_list->getActiveName();
+        vector<string> parts = ofSplitString(active, "::");
+        syphonServerDesc = ofxSyphonServerDescription(parts[0],parts[1]);
+        syphonClient.set(syphonServerDesc);
+    }
+}
+
+//these are our directory's callbacks
+void ofApp::serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg)
+{
+    for( auto& dir : arg.servers ){
+        ofLogNotice("ofxSyphonServerDirectory Server Announced")<<" Server Name: "<<dir.serverName <<" | App Name: "<<dir.appName;
+    }
+    rebuildSyphonServerList();
+}
+
+void ofApp::serverRetired(ofxSyphonServerDirectoryEventArgs &arg)
+{
+    for( auto& dir : arg.servers ){
+        ofLogNotice("ofxSyphonServerDirectory Server Retired")<<" Server Name: "<<dir.serverName <<" | App Name: "<<dir.appName;
+        if(syphonServerDesc == dir){
+            syphonServerDesc = ofxSyphonServerDescription();
+        }
+    }
+    rebuildSyphonServerList();
+}
+
+void ofApp::rebuildSyphonServerList(){
+    settingCanvas->removeWidget("Syphon Servers");
+    vector<string> server_names;
+    for( auto& server : syphonDir.getServerList()){
+        server_names.push_back(server.serverName+"::"+server.appName);
+    }
+    ofxUIRadio *radio_list =  settingCanvas->addRadio("Syphon Servers", server_names);
+    if(syphonServerDesc.serverName == "null" && syphonServerDesc.appName == "null" && syphonDir.size()){
+        syphonServerDesc = syphonDir.getServerList()[0];
+        syphonClient.set(syphonServerDesc);
+    }
+    if(syphonDir.size()){
+        radio_list->activateToggle(syphonServerDesc.serverName+"::"+syphonServerDesc.appName);
     }
 }
 
