@@ -9,7 +9,7 @@ Application for testing input syphon/spout streams at diffent simulated pixel de
 
 for OSX
 
-- [ofxSyphon](https://github.com/astellato/ofxSyphon)
+- [ofxSyphon](https://github.com/mrbichel/ofxSyphon) (note. this is not the canonical ofxSyphon but mrbichel's version that adds direct texture access)
 
 for Windows
 
