@@ -47,8 +47,11 @@ void EndPoint::onMouseMove(ofMouseEventArgs &e){
 }
 
 DoubleEndedPositioner::DoubleEndedPositioner(){
-    p2.pos.x = 10;
-    p2.pos.y = 10;
+    ofPoint win_size = ofGetWindowSize();
+    p1.pos.x = win_size.x * 0.25;
+    p1.pos.y = win_size.y * 0.5;
+    p2.pos.x = win_size.x * 0.75;
+    p2.pos.y = win_size.y * 0.5;
 }
 
 void DoubleEndedPositioner::draw(){
