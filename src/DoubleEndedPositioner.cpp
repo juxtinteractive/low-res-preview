@@ -23,8 +23,8 @@ EndPoint::~EndPoint(){
 void EndPoint::draw(){
     ofSetColor(255, 255, 0);
     int size = 10;
-    ofLine(pos.x - (size * 0.5), pos.y, pos.x + (size * 0.5), pos.y);
-    ofLine(pos.x, pos.y - (size * 0.5), pos.x, pos.y + (size * 0.5));
+    ofDrawLine(pos.x - (size * 0.5), pos.y, pos.x + (size * 0.5), pos.y);
+    ofDrawLine(pos.x, pos.y - (size * 0.5), pos.x, pos.y + (size * 0.5));
 }
 
 void EndPoint::onMouseDown(ofMouseEventArgs &e){
@@ -58,7 +58,7 @@ void DoubleEndedPositioner::draw(){
         p2.isDraging = false;
     }
     ofSetColor(255, 255, 0);
-    ofLine(p1.pos,p2.pos);
+    ofDrawLine(p1.pos,p2.pos);
 }
 
 float DoubleEndedPositioner::getLength(){

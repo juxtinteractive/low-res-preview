@@ -8,9 +8,9 @@ void ofApp::setup(){
     desideredPixelWidth = 1.0;
     lastState = state = Settings;
     outPixelPerMM = 3.0;
-    testImg.loadImage("rainbow.png");
-    testImg.loadImage("noise.jpg");
-    testImg.getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+    testImg.load("rainbow.png");
+    testImg.load("noise.jpg");
+    testImg.getTexture().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
     
     settingCanvas = new ofxUISuperCanvas("Settings");
     settingCanvas->setDimensions(300, 400);
