@@ -18,10 +18,6 @@ void ofApp::setup(){
     ofAddListener(syphonDir.events.serverAnnounced, this, &ofApp::serverAnnounced);
     ofAddListener(syphonDir.events.serverRetired, this, &ofApp::serverRetired);
     
-    testImg.load("rainbow.png");
-    testImg.load("noise.jpg");
-    testImg.getTexture().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
-    
     settingCanvas = new ofxUISuperCanvas("Settings");
     settingCanvas->setDimensions(300, 400);
     settingCanvas->addLabelButton("Calibrate Menu", false)->setTriggerType(OFX_UI_TRIGGER_END);
@@ -69,8 +65,6 @@ void ofApp::update(){
 void ofApp::draw(){
     ofClear(0);
     ofSetColor(ofColor::white);
-//    testImg.draw(0, 0, testImg.getWidth() * outPixelPerMM * desideredPixelWidth, testImg.getHeight() * outPixelPerMM * desideredPixelWidth);
-
     syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
 
     switch (state) {

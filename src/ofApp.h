@@ -43,7 +43,6 @@ class ofApp : public ofBaseApp{
     float outPixelPerMM;
     float currentCalibratorTolLengthInMM;
     float desideredPixelWidth;
-    ofImage testImg;
     DoubleEndedPositioner calibratorTool;
     
     
