@@ -45,6 +45,9 @@ class ofApp : public ofBaseApp{
     float desideredPixelWidth;
     DoubleEndedPositioner calibratorTool;
     
+    ofShader mainShader;
+    ofPlanePrimitive plane;
+    
     
     void serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg);
     void serverRetired(ofxSyphonServerDirectoryEventArgs &arg);

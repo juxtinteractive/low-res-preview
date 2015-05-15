@@ -12,6 +12,9 @@ void ofApp::setup(){
     lastState = state = Settings;
     outPixelPerMM = 3.0;
     
+    mainShader.load("shaders/default");
+    
+    
     syphonDir.setup();
     syphonClient.setup();
     syphonServerIndex = -1;
@@ -53,7 +56,6 @@ void ofApp::setup(){
 
     ofAddListener(calibrateCanvas->newGUIEvent,this,&ofApp::guiEvent);
     
-    
 }
 
 //--------------------------------------------------------------
@@ -65,8 +67,25 @@ void ofApp::update(){
 void ofApp::draw(){
     ofClear(0);
     ofSetColor(ofColor::white);
-    syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
+//    syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
+    plane.set(ofGetWidth(), ofGetHeight(), 10, 10);
+    plane.mapTexCoords(0, 0, 1, 1);
+    
+    syphonClient.bind();
+    ofTexture tex0 = syphonClient.getTextureRef();
 
+
+    // mapTexCoordsFromTexture(tex0);
+    mainShader.begin();
+    mainShader.setUniform2f("windowSize", ofGetWindowWidth(), ofGetWindowHeight());
+    mainShader.setUniform2f("texSize", syphonClient.getWidth(), syphonClient.getHeight());
+    mainShader.setUniform1f("texScale", outPixelPerMM * desideredPixelWidth);
+    ofPushMatrix();
+    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+    plane.draw();
+    ofPopMatrix();
+    mainShader.end();
+    syphonClient.unbind();
     switch (state) {
         case Viewing:
             break;

@@ -200,6 +200,8 @@
 		A74624221B0545930039BC10 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A74624241B05459D0039BC10 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A74624261B0545A20039BC10 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		A7ABBA301B054DB70083E382 /* default.frag */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = default.frag; sourceTree = "<group>"; };
+		A7ABBA311B054EE10083E382 /* default.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = default.vert; sourceTree = "<group>"; };
 		A7CD0A921B03F53F004759E6 /* Syphon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Syphon.framework; path = addons/ofxSyphon/libs/Syphon/lib/osx/Syphon.framework; sourceTree = OF_0_8_4; };
 		A7CD0A951B03FEA8004759E6 /* SyphonNameboundClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SyphonNameboundClient.m; path = addons/ofxSyphon/libs/Syphon/src/SyphonNameboundClient.m; sourceTree = OF_0_8_4; };
 		A7CD0A971B03FEF9004759E6 /* DoubleEndedPositioner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoubleEndedPositioner.cpp; sourceTree = "<group>"; };
@@ -390,6 +392,23 @@
 			name = framworks;
 			sourceTree = "<group>";
 		};
+		A7ABBA2C1B054DB70083E382 /* data */ = {
+			isa = PBXGroup;
+			children = (
+				A7ABBA2F1B054DB70083E382 /* shaders */,
+			);
+			path = data;
+			sourceTree = "<group>";
+		};
+		A7ABBA2F1B054DB70083E382 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				A7ABBA301B054DB70083E382 /* default.frag */,
+				A7ABBA311B054EE10083E382 /* default.vert */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
 		A7CD0A901B03F53F004759E6 /* lib */ = {
 			isa = PBXGroup;
 			children = (
@@ -521,6 +540,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				A7ABBA2C1B054DB70083E382 /* data */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
@@ -629,7 +649,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp -f $OF_PATH/libs/fmodex/lib/osx/libfmodex.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/libfmodex.dylib\"; install_name_tool -change ./libfmodex.dylib @executable_path/libfmodex.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\ncp -f \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\n";
+			shellScript = "cp -f $OF_PATH/libs/fmodex/lib/osx/libfmodex.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/libfmodex.dylib\"; install_name_tool -change ./libfmodex.dylib @executable_path/libfmodex.dylib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME\";\nmkdir -p \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\ncp -f \"$ICON_FILE\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources/\"\ncp -r $SRCROOT/data/* $TARGET_BUILD_DIR/data/";
 		};
 /* End PBXShellScriptBuildPhase section */
 
