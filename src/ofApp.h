@@ -43,6 +43,7 @@ class ofApp : public ofBaseApp{
     float outPixelPerMM;
     float currentCalibratorTolLengthInMM;
     float desideredPixelWidth;
+    int desideredPixelWidthLarge;
     float edgeSizePct;
     float edgeSoft;
     int mode;

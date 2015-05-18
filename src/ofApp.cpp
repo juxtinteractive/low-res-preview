@@ -7,8 +7,8 @@ const float ofApp::calibrationSizeOptionsValues[] = {279.4,215.9,88.9,100.0};
 void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetWindowTitle("LowResPreview");
-    
-    desideredPixelWidth = 1.0;
+    desideredPixelWidthLarge = 1;
+    desideredPixelWidth = 0.0;
     lastState = state = Settings;
     outPixelPerMM = 3.0;
     edgeSizePct = 1.0;
@@ -28,7 +28,11 @@ void ofApp::setup(){
     settingCanvas->setDimensions(300, 400);
     settingCanvas->addLabelButton("Calibrate Menu", false)->setTriggerType(OFX_UI_TRIGGER_END);
     settingCanvas->addLabel("pixel width (mm)");
-    settingCanvas->addSlider("pixelWidth", 0.0, 10.0, &desideredPixelWidth)->setLabelVisible(false);
+    ofxUISlider_<int> *pwl = new ofxUISlider_<int>("pixelWidthLarge", 0, 100, &desideredPixelWidthLarge,292,settingCanvas->getGlobalSliderHeight(),0,0);
+    pwl->setLabelVisible(false);
+
+    settingCanvas->addWidgetDown(pwl);
+    settingCanvas->addSlider("pixelWidth", 0.0, 0.9999, &desideredPixelWidth)->setLabelVisible(false);
     ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth));
     pwTi->setOnlyNumericInput(true);
     settingCanvas->addSpacer();
@@ -88,7 +92,7 @@ void ofApp::draw(){
     mainShader.begin();
     mainShader.setUniform2f("windowSize", ofGetWindowWidth(), ofGetWindowHeight());
     mainShader.setUniform2f("texSize", syphonClient.getWidth(), syphonClient.getHeight());
-    mainShader.setUniform1f("texScale", outPixelPerMM * desideredPixelWidth);
+    mainShader.setUniform1f("texScale", outPixelPerMM * (float(desideredPixelWidthLarge)+desideredPixelWidth));
     mainShader.setUniform1f("circleOffset",edgeSizePct);
     mainShader.setUniform1f("circleEdge",edgeSoft);
     mainShader.setUniform1i("mode",mode);
@@ -121,12 +125,15 @@ void ofApp::exit(){
 void ofApp::guiEvent(ofxUIEventArgs &e)
 {
     string name = e.getName();
-    if(name == "pixelWidth"){
-        ((ofxUITextInput*)settingCanvas->getWidget("pixelWidthText"))->setTextString(ofToString(desideredPixelWidth));
+    if(name == "pixelWidth" || name == "pixelWidthLarge"){
+        ((ofxUITextInput*)settingCanvas->getWidget("pixelWidthText"))->setTextString(ofToString(float(desideredPixelWidthLarge)+desideredPixelWidth));
     }else if(name == "pixelWidthText"){
         string val = ((ofxUITextInput*)e.widget)->getTextString();
-        desideredPixelWidth = ofToFloat(val);
-
+        float fval = ofToFloat(val);
+        desideredPixelWidth = fmodf(fval,1.0);
+        desideredPixelWidthLarge = floor(fval);
+        
+        
     }else if(name == "Calibrate Menu"){
         lastState = state;
         state = Calibratig;
