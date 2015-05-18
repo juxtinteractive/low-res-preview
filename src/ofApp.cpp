@@ -11,6 +11,12 @@ void ofApp::setup(){
     desideredPixelWidth = 1.0;
     lastState = state = Settings;
     outPixelPerMM = 3.0;
+    edgeSizePct = 1.0;
+    edgeSoft = 0.1;
+    mode = 0;
+    
+    mainShader.load("shaders/default");
+    
     
     syphonDir.setup();
     syphonClient.setup();
@@ -25,6 +31,12 @@ void ofApp::setup(){
     settingCanvas->addSlider("pixelWidth", 0.0, 10.0, &desideredPixelWidth)->setLabelVisible(false);
     ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth));
     pwTi->setOnlyNumericInput(true);
+    settingCanvas->addSpacer();
+    const char *modes[] = {"Round","Square"};
+    settingCanvas->addRadio("Mode", vector<string>(modes, end(modes)),OFX_UI_ORIENTATION_HORIZONTAL)->activateToggle("Round");
+    settingCanvas->addSpacer();
+    settingCanvas->addSlider("Edge Size %", 0.001, 1.0, &edgeSizePct);
+    settingCanvas->addSlider("Edge Softness", 0.001, 0.5, &edgeSoft);
     settingCanvas->addSpacer();
     settingCanvas->addRadio("Syphon Servers", vector<string>());
 
@@ -53,7 +65,6 @@ void ofApp::setup(){
 
     ofAddListener(calibrateCanvas->newGUIEvent,this,&ofApp::guiEvent);
     
-    
 }
 
 //--------------------------------------------------------------
@@ -65,8 +76,28 @@ void ofApp::update(){
 void ofApp::draw(){
     ofClear(0);
     ofSetColor(ofColor::white);
-    syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
+//    syphonClient.draw(0, 0, syphonClient.getWidth() * outPixelPerMM * desideredPixelWidth, syphonClient.getHeight() * outPixelPerMM * desideredPixelWidth);
+    plane.set(ofGetWidth(), ofGetHeight(), 10, 10);
+    plane.mapTexCoords(0, 0, 1, 1);
+    
+    syphonClient.bind();
+    ofTexture tex0 = syphonClient.getTextureRef();
 
+
+    // mapTexCoordsFromTexture(tex0);
+    mainShader.begin();
+    mainShader.setUniform2f("windowSize", ofGetWindowWidth(), ofGetWindowHeight());
+    mainShader.setUniform2f("texSize", syphonClient.getWidth(), syphonClient.getHeight());
+    mainShader.setUniform1f("texScale", outPixelPerMM * desideredPixelWidth);
+    mainShader.setUniform1f("circleOffset",edgeSizePct);
+    mainShader.setUniform1f("circleEdge",edgeSoft);
+    mainShader.setUniform1i("mode",mode);
+    ofPushMatrix();
+    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+    plane.draw();
+    ofPopMatrix();
+    mainShader.end();
+    syphonClient.unbind();
     switch (state) {
         case Viewing:
             break;
@@ -123,6 +154,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         vector<string> parts = ofSplitString(active, "::");
         syphonServerDesc = ofxSyphonServerDescription(parts[0],parts[1]);
         syphonClient.set(syphonServerDesc);
+    }else if(name == "Mode"){
+        ofxUIRadio *mode_list = (ofxUIRadio*)e.widget;
+        if(mode_list->getActiveName() == "Round"){
+            mode = 0;
+        }else {
+            mode = 1;
+        }
     }
 }
 

@@ -5,11 +5,11 @@ Application for testing input syphon/spout streams at diffent simulated pixel de
 
 - [openFrameworks 0.8.4](http://openframeworks.cc/)
 - [ofxUI](https://github.com/rezaali/ofxUI)
-    - ofxXmlSettings
+- ofxXmlSettings (comes preinstalled with openFrameworks)
 
 for OSX
 
-- [ofxSyphon](https://github.com/astellato/ofxSyphon)
+- [ofxSyphon](https://github.com/mrbichel/ofxSyphon) (note. this is not the canonical ofxSyphon but mrbichel's version that adds direct texture access)
 
 for Windows
 
