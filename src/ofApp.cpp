@@ -61,9 +61,8 @@ void ofApp::setup(){
     ofxUILabel *calLabel = calibrateCanvas->addLabel("selected_calibration");
     calLabel->setLabel(calibrationSizeOptionsNames[defautlt_index]);
     
-    ofxUIDropDownList* cal_size_widget = calibrateCanvas->addDropDownList("Calibration Size", calibrationSizeOptions);
-    vector<int> &indecies = cal_size_widget->getSelectedIndeces();
-    indecies.push_back(defautlt_index);
+    ofxUIRadio* cal_size_widget = calibrateCanvas->addRadio("Calibration Size", calibrationSizeOptions);
+    cal_size_widget->activateToggle(calibrationSizeOptions[defautlt_index]);
     
     currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[defautlt_index];
 
@@ -147,10 +146,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         calibrateCanvas->setVisible(false);
         
     }else if(name == "Calibration Size"){
-        ofxUIDropDownList* w = ((ofxUIDropDownList*)e.widget);
-        vector<int> &indecies = w->getSelectedIndeces();
-        ((ofxUILabel*)calibrateCanvas->getWidget("selected_calibration"))->setLabel(calibrationSizeOptionsNames[indecies[0]]);
-        currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[indecies[0]];
+        ofxUIRadio* w = ((ofxUIRadio*)e.widget);
+        string active = w->getActiveName();
+        vector<string> names(calibrationSizeOptionsNames,end(calibrationSizeOptionsNames));
+        int pos = find(names.begin(), names.end(), active) - names.begin();
+        ((ofxUILabel*)calibrateCanvas->getWidget("selected_calibration"))->setLabel(calibrationSizeOptionsNames[pos]);
+        currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[pos];
         
     }else if(name == "Read From Marker"){
         outPixelPerMM = calibratorTool.getLength() / currentCalibratorTolLengthInMM;
