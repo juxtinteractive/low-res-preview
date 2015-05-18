@@ -43,6 +43,9 @@ class ofApp : public ofBaseApp{
     float outPixelPerMM;
     float currentCalibratorTolLengthInMM;
     float desideredPixelWidth;
+    float edgeSizePct;
+    float edgeSoft;
+    int mode;
     DoubleEndedPositioner calibratorTool;
     
     ofShader mainShader;
