@@ -43,6 +43,7 @@ class ofApp : public ofBaseApp{
     float outPixelPerMM;
     float currentCalibratorTolLengthInMM;
     float desideredPixelWidth;
+    int desideredPixelWidthLarge;
     float edgeSizePct;
     float edgeSoft;
     int mode;
@@ -50,6 +51,7 @@ class ofApp : public ofBaseApp{
     
     ofShader mainShader;
     ofPlanePrimitive plane;
+    ofVec2f texAlign;
     
     
     void serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg);

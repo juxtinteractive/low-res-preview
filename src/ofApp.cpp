@@ -7,10 +7,10 @@ const float ofApp::calibrationSizeOptionsValues[] = {279.4,215.9,88.9,100.0};
 void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetWindowTitle("LowResPreview");
-    
-    desideredPixelWidth = 1.0;
+    desideredPixelWidthLarge = 1;
+    desideredPixelWidth = 0.0;
     lastState = state = Settings;
-    outPixelPerMM = 3.0;
+    outPixelPerMM = 1.0;
     edgeSizePct = 1.0;
     edgeSoft = 0.1;
     mode = 0;
@@ -28,8 +28,12 @@ void ofApp::setup(){
     settingCanvas->setDimensions(300, 400);
     settingCanvas->addLabelButton("Calibrate Menu", false)->setTriggerType(OFX_UI_TRIGGER_END);
     settingCanvas->addLabel("pixel width (mm)");
-    settingCanvas->addSlider("pixelWidth", 0.0, 10.0, &desideredPixelWidth)->setLabelVisible(false);
-    ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth));
+    ofxUISlider_<int> *pwl = new ofxUISlider_<int>("pixelWidthLarge", 0, 100, &desideredPixelWidthLarge,292,settingCanvas->getGlobalSliderHeight(),0,0);
+    pwl->setLabelVisible(false);
+
+    settingCanvas->addWidgetDown(pwl);
+    settingCanvas->addSlider("pixelWidth", 0.0, 0.9999, &desideredPixelWidth)->setLabelVisible(false);
+    ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth+desideredPixelWidthLarge));
     pwTi->setOnlyNumericInput(true);
     settingCanvas->addSpacer();
     const char *modes[] = {"Round","Square"};
@@ -37,6 +41,11 @@ void ofApp::setup(){
     settingCanvas->addSpacer();
     settingCanvas->addSlider("Edge Size %", 0.001, 1.0, &edgeSizePct);
     settingCanvas->addSlider("Edge Softness", 0.001, 0.5, &edgeSoft);
+    settingCanvas->addSpacer();
+    settingCanvas->addLabel("Alignment",OFX_UI_FONT_SMALL);
+    ofxUIToggleMatrix *mat = settingCanvas->addToggleMatrix("alignment", 3, 3);
+    mat->setAllowMultiple(false);
+    mat->getToggles()[6]->setValue(true);
     settingCanvas->addSpacer();
     settingCanvas->addRadio("Syphon Servers", vector<string>());
 
@@ -57,9 +66,8 @@ void ofApp::setup(){
     ofxUILabel *calLabel = calibrateCanvas->addLabel("selected_calibration");
     calLabel->setLabel(calibrationSizeOptionsNames[defautlt_index]);
     
-    ofxUIDropDownList* cal_size_widget = calibrateCanvas->addDropDownList("Calibration Size", calibrationSizeOptions);
-    vector<int> &indecies = cal_size_widget->getSelectedIndeces();
-    indecies.push_back(defautlt_index);
+    ofxUIRadio* cal_size_widget = calibrateCanvas->addRadio("Calibration Size", calibrationSizeOptions);
+    cal_size_widget->activateToggle(calibrationSizeOptions[defautlt_index]);
     
     currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[defautlt_index];
 
@@ -88,10 +96,11 @@ void ofApp::draw(){
     mainShader.begin();
     mainShader.setUniform2f("windowSize", ofGetWindowWidth(), ofGetWindowHeight());
     mainShader.setUniform2f("texSize", syphonClient.getWidth(), syphonClient.getHeight());
-    mainShader.setUniform1f("texScale", outPixelPerMM * desideredPixelWidth);
+    mainShader.setUniform1f("texScale", outPixelPerMM * (float(desideredPixelWidthLarge)+desideredPixelWidth));
     mainShader.setUniform1f("circleOffset",edgeSizePct);
     mainShader.setUniform1f("circleEdge",edgeSoft);
     mainShader.setUniform1i("mode",mode);
+    mainShader.setUniform2f("texAlign",texAlign.x,texAlign.y);
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     plane.draw();
@@ -121,18 +130,28 @@ void ofApp::exit(){
 void ofApp::guiEvent(ofxUIEventArgs &e)
 {
     string name = e.getName();
-    if(name == "pixelWidth"){
-        ((ofxUITextInput*)settingCanvas->getWidget("pixelWidthText"))->setTextString(ofToString(desideredPixelWidth));
+    string alignment = "alignment";
+    if(name == "pixelWidth" || name == "pixelWidthLarge"){
+        ((ofxUITextInput*)settingCanvas->getWidget("pixelWidthText"))->setTextString(ofToString(float(desideredPixelWidthLarge)+desideredPixelWidth));
     }else if(name == "pixelWidthText"){
         string val = ((ofxUITextInput*)e.widget)->getTextString();
-        desideredPixelWidth = ofToFloat(val);
-
+        float fval = ofToFloat(val);
+        desideredPixelWidth = fmodf(fval,1.0);
+        desideredPixelWidthLarge = floor(fval);
+        
+        
     }else if(name == "Calibrate Menu"){
         lastState = state;
         state = Calibratig;
         settingCanvas->setVisible(false);
         calibrateCanvas->setVisible(true);
-        
+    }else if(name.substr(0,alignment.size()) == alignment ){
+        int start = alignment.size()+1;
+        int x = ofToInt(name.substr(start,start+1));
+        int y = ofToInt(name.substr(start+2,start+3));
+        texAlign.x = x == 0 ? 0 : x == 1 ? 0.5 : 1.0;
+        texAlign.y = y == 0 ? 1.0 : y == 1 ? 0.5 : 0.0;
+
     }else if(name == "Settings Menu"){
         lastState = state;
         state = Settings;
@@ -140,10 +159,12 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         calibrateCanvas->setVisible(false);
         
     }else if(name == "Calibration Size"){
-        ofxUIDropDownList* w = ((ofxUIDropDownList*)e.widget);
-        vector<int> &indecies = w->getSelectedIndeces();
-        ((ofxUILabel*)calibrateCanvas->getWidget("selected_calibration"))->setLabel(calibrationSizeOptionsNames[indecies[0]]);
-        currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[indecies[0]];
+        ofxUIRadio* w = ((ofxUIRadio*)e.widget);
+        string active = w->getActiveName();
+        vector<string> names(calibrationSizeOptionsNames,end(calibrationSizeOptionsNames));
+        int pos = find(names.begin(), names.end(), active) - names.begin();
+        ((ofxUILabel*)calibrateCanvas->getWidget("selected_calibration"))->setLabel(calibrationSizeOptionsNames[pos]);
+        currentCalibratorTolLengthInMM = calibrationSizeOptionsValues[pos];
         
     }else if(name == "Read From Marker"){
         outPixelPerMM = calibratorTool.getLength() / currentCalibratorTolLengthInMM;
