@@ -51,6 +51,7 @@ class ofApp : public ofBaseApp{
     
     ofShader mainShader;
     ofPlanePrimitive plane;
+    ofVec2f texAlign;
     
     
     void serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg);

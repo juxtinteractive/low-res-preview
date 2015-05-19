@@ -10,7 +10,7 @@ void ofApp::setup(){
     desideredPixelWidthLarge = 1;
     desideredPixelWidth = 0.0;
     lastState = state = Settings;
-    outPixelPerMM = 3.0;
+    outPixelPerMM = 1.0;
     edgeSizePct = 1.0;
     edgeSoft = 0.1;
     mode = 0;
@@ -33,7 +33,7 @@ void ofApp::setup(){
 
     settingCanvas->addWidgetDown(pwl);
     settingCanvas->addSlider("pixelWidth", 0.0, 0.9999, &desideredPixelWidth)->setLabelVisible(false);
-    ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth));
+    ofxUITextInput *pwTi =  settingCanvas->addTextInput("pixelWidthText", ofToString(desideredPixelWidth+desideredPixelWidthLarge));
     pwTi->setOnlyNumericInput(true);
     settingCanvas->addSpacer();
     const char *modes[] = {"Round","Square"};
@@ -41,6 +41,11 @@ void ofApp::setup(){
     settingCanvas->addSpacer();
     settingCanvas->addSlider("Edge Size %", 0.001, 1.0, &edgeSizePct);
     settingCanvas->addSlider("Edge Softness", 0.001, 0.5, &edgeSoft);
+    settingCanvas->addSpacer();
+    settingCanvas->addLabel("Alignment",OFX_UI_FONT_SMALL);
+    ofxUIToggleMatrix *mat = settingCanvas->addToggleMatrix("alignment", 3, 3);
+    mat->setAllowMultiple(false);
+    mat->getToggles()[6]->setValue(true);
     settingCanvas->addSpacer();
     settingCanvas->addRadio("Syphon Servers", vector<string>());
 
@@ -95,6 +100,7 @@ void ofApp::draw(){
     mainShader.setUniform1f("circleOffset",edgeSizePct);
     mainShader.setUniform1f("circleEdge",edgeSoft);
     mainShader.setUniform1i("mode",mode);
+    mainShader.setUniform2f("texAlign",texAlign.x,texAlign.y);
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     plane.draw();
@@ -124,6 +130,7 @@ void ofApp::exit(){
 void ofApp::guiEvent(ofxUIEventArgs &e)
 {
     string name = e.getName();
+    string alignment = "alignment";
     if(name == "pixelWidth" || name == "pixelWidthLarge"){
         ((ofxUITextInput*)settingCanvas->getWidget("pixelWidthText"))->setTextString(ofToString(float(desideredPixelWidthLarge)+desideredPixelWidth));
     }else if(name == "pixelWidthText"){
@@ -138,7 +145,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         state = Calibratig;
         settingCanvas->setVisible(false);
         calibrateCanvas->setVisible(true);
-        
+    }else if(name.substr(0,alignment.size()) == alignment ){
+        int start = alignment.size()+1;
+        int x = ofToInt(name.substr(start,start+1));
+        int y = ofToInt(name.substr(start+2,start+3));
+        texAlign.x = x == 0 ? 0 : x == 1 ? 0.5 : 1.0;
+        texAlign.y = y == 0 ? 1.0 : y == 1 ? 0.5 : 0.0;
+
     }else if(name == "Settings Menu"){
         lastState = state;
         state = Settings;
